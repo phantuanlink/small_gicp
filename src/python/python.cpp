@@ -22,42 +22,58 @@ namespace py = pybind11;
 using namespace small_gicp;
 
 PYBIND11_MODULE(small_gicp, m) {
-  m.doc() = "Small GICP";
+  m.doc() = "small_gicp: Efficient and parallelized algorithms for point cloud registration";
 
   // PointCloud
   py::class_<PointCloud, std::shared_ptr<PointCloud>>(m, "PointCloud")  //
-    .def(py::init([](const Eigen::MatrixXd& points) {
-      if (points.cols() != 3 && points.cols() != 4) {
-        std::cerr << "points must be Nx3 or Nx4" << std::endl;
-        return std::make_shared<PointCloud>();
-      }
-
-      auto pc = std::make_shared<PointCloud>();
-      pc->resize(points.rows());
-      if (points.cols() == 3) {
-        for (size_t i = 0; i < points.rows(); i++) {
-          pc->point(i) << points.row(i).transpose(), 1.0;
+    .def(
+      py::init([](const Eigen::MatrixXd& points) {
+        if (points.cols() != 3 && points.cols() != 4) {
+          std::cerr << "points must be Nx3 or Nx4" << std::endl;
+          return std::make_shared<PointCloud>();
         }
-      } else {
-        for (size_t i = 0; i < points.rows(); i++) {
-          pc->point(i) << points.row(i).transpose();
-        }
-      }
 
-      return pc;
-    }))  //
+        auto pc = std::make_shared<PointCloud>();
+        pc->resize(points.rows());
+        if (points.cols() == 3) {
+          for (size_t i = 0; i < points.rows(); i++) {
+            pc->point(i) << points.row(i).transpose(), 1.0;
+          }
+        } else {
+          for (size_t i = 0; i < points.rows(); i++) {
+            pc->point(i) << points.row(i).transpose();
+          }
+        }
+
+        return pc;
+      }),
+      "Constructor. points must be Nx3 or Nx4 numpy array.")  //
     .def("__repr__", [](const PointCloud& points) { return "small_gicp.PointCloud (" + std::to_string(points.size()) + " points)"; })
-    .def("size", &PointCloud::size)
+    .def("size", &PointCloud::size, "Get the number of points")
     .def(
       "points",
-      [](const PointCloud& points) -> Eigen::MatrixXd { return Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(points.points[0].data(), points.size(), 4); })
+      [](const PointCloud& points) -> Eigen::MatrixXd { return Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(points.points[0].data(), points.size(), 4); },
+      "Get points as Nx4 numpy array. Each row represents [x, y, z, 1].")
     .def(
       "normals",
-      [](const PointCloud& points) -> Eigen::MatrixXd { return Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(points.normals[0].data(), points.size(), 4); })
-    .def("covs", [](const PointCloud& points) { return points.covs; })
-    .def("point", [](const PointCloud& points, size_t i) -> Eigen::Vector4d { return points.point(i); })
-    .def("normal", [](const PointCloud& points, size_t i) -> Eigen::Vector4d { return points.normal(i); })
-    .def("cov", [](const PointCloud& points, size_t i) -> Eigen::Matrix4d { return points.cov(i); });
+      [](const PointCloud& points) -> Eigen::MatrixXd { return Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(points.normals[0].data(), points.size(), 4); },
+      "Get normals as Nx4 numpy array. Each row represents [nx, ny, nz, 0].")
+    .def(
+      "covs",
+      [](const PointCloud& points) { return points.covs; },
+      "Get covariances as list 4x4 numpy arrays. The bottom row and right column are filled by zeros.")
+    .def(
+      "point",
+      [](const PointCloud& points, size_t i) -> Eigen::Vector4d { return points.point(i); },
+      "Get i-th point")
+    .def(
+      "normal",
+      [](const PointCloud& points, size_t i) -> Eigen::Vector4d { return points.normal(i); },
+      "Get i-th normal")
+    .def(
+      "cov",
+      [](const PointCloud& points, size_t i) -> Eigen::Matrix4d { return points.cov(i); },
+      "Get i-th covariance");
 
   // KdTree
   py::class_<KdTreeOMP<PointCloud>, std::shared_ptr<KdTreeOMP<PointCloud>>>(m, "KdTree")  //
@@ -72,7 +88,9 @@ PYBIND11_MODULE(small_gicp, m) {
         double k_sq_dist = std::numeric_limits<double>::max();
         const size_t found = traits::nearest_neighbor_search(kdtree, Eigen::Vector4d(pt.x(), pt.y(), pt.z(), 1.0), &k_index, &k_sq_dist);
         return std::make_tuple(found, k_index, k_sq_dist);
-      })
+      },
+      "Find the nearest neighbor of the given point.",
+      py::arg("pt"))
     .def("knn_search", [](const KdTreeOMP<PointCloud>& kdtree, const Eigen::Vector3d& pt, int k) {
       std::vector<size_t> k_indices(k, -1);
       std::vector<double> k_sq_dists(k, std::numeric_limits<double>::max());
@@ -105,13 +123,16 @@ PYBIND11_MODULE(small_gicp, m) {
         sst << "error= " << result.error << "\n";
         return sst.str();
       })
-    .def_property_readonly("T_target_source", [](const RegistrationResult& result) -> Eigen::Matrix4d { return result.T_target_source.matrix(); })
-    .def_readonly("converged", &RegistrationResult::converged)
-    .def_readonly("iterations", &RegistrationResult::iterations)
-    .def_readonly("num_inliers", &RegistrationResult::num_inliers)
-    .def_readonly("H", &RegistrationResult::H)
-    .def_readonly("b", &RegistrationResult::b)
-    .def_readonly("error", &RegistrationResult::error);
+    .def_property_readonly(
+      "T_target_source",
+      [](const RegistrationResult& result) -> Eigen::Matrix4d { return result.T_target_source.matrix(); },
+      "Estimated transformation matrix")
+    .def_readonly("converged", &RegistrationResult::converged, "True if the optimization converged")
+    .def_readonly("iterations", &RegistrationResult::iterations, "Number of iterations")
+    .def_readonly("num_inliers", &RegistrationResult::num_inliers, "Number of inlier source points")
+    .def_readonly("H", &RegistrationResult::H, "Hessian matrix")
+    .def_readonly("b", &RegistrationResult::b, "information vector")
+    .def_readonly("error", &RegistrationResult::error, "Final error");
 
   // read_ply
   m.def(
