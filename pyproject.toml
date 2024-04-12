@@ -4,10 +4,10 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "small_gicp"
-version = "0.0.1"
+version = "0.0.2"
 authors = [{name = "Kenji Koide", email = "k.koide@aist.go.jp"}]
 description = "Efficient and parallelized algorithms for fine point cloud registration"
-readme = "README.md"
+readme = "README.py.md"
 license = {text = "MIT"}
 requires-python = ">=3.7"
 
