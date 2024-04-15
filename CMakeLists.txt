@@ -82,6 +82,10 @@ if(BUILD_WITH_MARCH_NATIVE)
   add_compile_options(-march=native)
 endif()
 
+if(WIN32)
+  add_compile_definitions(_USE_MATH_DEFINES)
+endif()
+
 ##############
 ## Coverage ##
 ##############
