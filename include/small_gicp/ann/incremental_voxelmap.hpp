@@ -139,14 +139,14 @@ public:
     return num_found;
   }
 
-  inline size_t calc_index(const size_t voxel_id, const size_t point_id) const { return (voxel_id << point_id_bits) | point_id; }
-  inline size_t voxel_id(const size_t i) const { return i >> point_id_bits; }                ///< Extract the point ID from an index
-  inline size_t point_id(const size_t i) const { return i & ((1ul << point_id_bits) - 1); }  ///< Extract the voxel ID from an index
+  inline size_t calc_index(const size_t voxel_id, const size_t point_id) const { return (point_id << voxel_id_bits) | voxel_id; }
+  inline size_t voxel_id(const size_t i) const { return i & ((1ul << voxel_id_bits) - 1); }  ///< Extract the voxel ID from an index
+  inline size_t point_id(const size_t i) const { return i >> voxel_id_bits; }                ///< Extract the point ID from an index
 
 public:
   static_assert(sizeof(size_t) >= 8, "size_t must be larger than 64-bit");
-  static constexpr int point_id_bits = 32;                  ///< Use the first 32 bits for point id
-  static constexpr int voxel_id_bits = 64 - point_id_bits;  ///< Use the remaining bits for voxel id
+  static constexpr int voxel_id_bits = 32;                  ///< Use the first 32 bits for voxel id
+  static constexpr int point_id_bits = 64 - voxel_id_bits;  ///< Use the remaining bits for point id
   const double inv_leaf_size;                               ///< Inverse of the voxel size
 
   size_t lru_horizon;      ///< LRU horizon size
