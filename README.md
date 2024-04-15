@@ -43,7 +43,19 @@ sudo make install
 
 ### Python
 
+**Install from PyPI:**
+
 ```bash
+pip install small_gicp --user
+```
+
+**Install from source:**
+
+```bash
+pip install git+https://github.com/koide3/small_gicp.git --user
+
+# Alternatively, clone and build the package locally
+git clone https://github.com/koide3/small_gicp
 cd small_gicp
 pip install . --user
 
