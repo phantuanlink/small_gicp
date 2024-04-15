@@ -144,7 +144,7 @@ public:
   inline size_t point_id(const size_t i) const { return i & ((1ul << point_id_bits) - 1); }  ///< Extract the voxel ID from an index
 
 public:
-  static_assert(sizeof(size_t) == 8, "size_t must be 64-bit");
+  static_assert(sizeof(size_t) < 8, "size_t must be larger than 64-bit");
   static constexpr int point_id_bits = 32;                  ///< Use the first 32 bits for point id
   static constexpr int voxel_id_bits = 64 - point_id_bits;  ///< Use the remaining bits for voxel id
   const double inv_leaf_size;                               ///< Inverse of the voxel size
