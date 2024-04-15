@@ -30,13 +30,12 @@ wheel.py-api = "cp312" # Build stable ABI wheels for CPython 3.12+
 [tool.scikit-build.cmake.define]
 BUILD_PYTHON_BINDINGS = true
 BUILD_SHARED_LIBS = false
-BUILD_WITH_OPENMP = true
 
 [tool.cibuildwheel.linux]
 before-all = "yum install -y eigen3-devel libomp-devel"
 
 [tool.cibuildwheel.macos]
-before-all = "brew install eigen libomp"
+before-all = "brew install llvm eigen libomp"
 
 [tool.cibuildwheel.windows]
 before-all = "choco install eigen -y"
