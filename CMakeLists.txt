@@ -83,6 +83,7 @@ if(BUILD_WITH_MARCH_NATIVE)
 endif()
 
 if(WIN32)
+  add_compile_options(-openmp:llvm)
   add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
