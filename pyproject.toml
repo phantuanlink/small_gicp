@@ -9,6 +9,7 @@ authors = [{name = "Kenji Koide", email = "k.koide@aist.go.jp"}]
 description = "Efficient and parallelized algorithms for fine point cloud registration"
 readme = "README.py.md"
 license = {text = "MIT"}
+dependencies = ["numpy >=1.21", "scipy >=1.7"]
 requires-python = ">=3.7"
 
 [project.urls]
@@ -29,9 +30,21 @@ wheel.py-api = "cp312" # Build stable ABI wheels for CPython 3.12+
 [tool.scikit-build.cmake.define]
 BUILD_PYTHON_BINDINGS = true
 BUILD_SHARED_LIBS = false
+BUILD_WITH_OPENMP = true
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y eigen3-devel libomp-devel"
+
+[tool.cibuildwheel.macos]
+before-all = "brew install eigen libomp"
+
+[tool.cibuildwheel.windows]
+before-all = "choco install eigen -y"
 
 [tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"
 build = "*"
 skip = "pp*" # Don't build for PyPy
-test-command = "pytest {project}/src --color=yes -v"
+test-requires = "pytest"
+test-command = "cd {project} && pytest {project}/src/example/*.py --color=yes -v"
 build-verbosity = 1
