@@ -131,7 +131,7 @@ if(BUILD_PYTHON_BINDINGS)
   find_package(Python COMPONENTS Interpreter Development)
   find_package(pybind11 CONFIG REQUIRED)
 
-  pybind11_add_module(small_gicp_python src/python/python.cpp)
+  pybind11_add_module(small_gicp_python SHARED src/python/python.cpp)
   set_target_properties(small_gicp_python PROPERTIES OUTPUT_NAME small_gicp)
   target_link_libraries(small_gicp_python PRIVATE small_gicp)
 endif()
