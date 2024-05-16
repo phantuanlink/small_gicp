@@ -8,3 +8,5 @@ dist/*
 small_gicp.egg-info/*
 
 scripts/results/*
+
+github*

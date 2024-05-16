@@ -74,8 +74,8 @@ if (BUILD_WITH_PCL)
     add_library(PCL::PCL INTERFACE IMPORTED)
     set_target_properties(PCL::PCL PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${PCL_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${PCL_LIBRARIES}"
     )
+    target_link_libraries(PCL::PCL INTERFACE ${PCL_LIBRARIES})
   endif()
 endif()
 
@@ -181,7 +181,7 @@ if(BUILD_BENCHMARKS)
     src/benchmark/odometry_benchmark_fast_gicp.cpp
     src/benchmark/odometry_benchmark_fast_vgicp.cpp
     src/benchmark/odometry_benchmark_small_gicp.cpp
-    src/benchmark/odometry_benchmark_small_gicp_pcl.cpp
+    # src/benchmark/odometry_benchmark_small_gicp_pcl.cpp
     src/benchmark/odometry_benchmark_small_gicp_omp.cpp
     src/benchmark/odometry_benchmark_small_vgicp_omp.cpp
     src/benchmark/odometry_benchmark_small_gicp_tbb.cpp
@@ -216,18 +216,18 @@ if(BUILD_BENCHMARKS)
     $<TARGET_NAME_IF_EXISTS:TBB::tbbmalloc>
   )
 
-  # Downsampling benchmark
-  add_executable(downsampling_benchmark
-    src/benchmark/downsampling_benchmark.cpp
-  )
-  target_link_libraries(downsampling_benchmark PRIVATE
-    fmt::fmt
-    Eigen3::Eigen
-    $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
-    $<TARGET_NAME_IF_EXISTS:TBB::tbb>
-    $<TARGET_NAME_IF_EXISTS:TBB::tbbmalloc>
-    $<TARGET_NAME_IF_EXISTS:PCL::PCL>
-  )
+  # # Downsampling benchmark
+  # add_executable(downsampling_benchmark
+  #   src/benchmark/downsampling_benchmark.cpp
+  # )
+  # target_link_libraries(downsampling_benchmark PRIVATE
+  #   fmt::fmt
+  #   Eigen3::Eigen
+  #   $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
+  #   $<TARGET_NAME_IF_EXISTS:TBB::tbb>
+  #   $<TARGET_NAME_IF_EXISTS:TBB::tbbmalloc>
+  #   $<TARGET_NAME_IF_EXISTS:PCL::PCL>
+  # )
 endif()
 
 #############

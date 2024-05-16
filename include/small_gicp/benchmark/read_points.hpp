@@ -7,6 +7,11 @@
 #include <vector>
 #include <Eigen/Core>
 
+#ifdef BUILD_WITH_PCL
+#include <pcl/io/ply_io.h>
+#include <pcl/point_types.h>
+#endif
+
 namespace small_gicp {
 
 /// @brief Read points from file (simple float4 array).
@@ -107,5 +112,31 @@ static std::vector<Eigen::Vector4f> read_ply(const std::string& filename) {
 
   return points;
 }
+
+#ifdef BUILD_WITH_PCL
+
+/// @brief Read point cloud from a PLY file.
+/// @note  This function to improve the read_ply to read any ply files, as long as they have x, y, z data in it
+/// @param filename  Filename
+/// @return          Points
+static std::vector<Eigen::Vector4f> read_any_ply(const std::string& filename) {
+  std::vector<Eigen::Vector4f> points;
+
+  // Load the PLY file using PCL
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  if (pcl::io::loadPLYFile<pcl::PointXYZ>(filename, *cloud) == -1) {
+    std::cerr << "error: failed to open " << filename << std::endl;
+    return {};
+  }
+
+  points.resize(cloud->size());
+
+  for (size_t i = 0; i < cloud->size(); ++i) {
+    points[i] = Eigen::Vector4f((*cloud)[i].x, (*cloud)[i].y, (*cloud)[i].z, 1.0);
+  }
+
+  return points;
+}
+#endif
 
 }  // namespace small_gicp

@@ -57,9 +57,9 @@ private:
   Eigen::Isometry3d T;
 };
 
-static auto small_gicp_pcl_registry =
-  register_odometry("small_gicp_pcl", [](const OdometryEstimationParams& params) { return std::make_shared<SmallGICPPCLOdometryEstimation>(params); });
+// static auto small_gicp_pcl_registry =
+//   register_odometry("small_gicp_pcl", [](const OdometryEstimationParams& params) { return std::make_shared<SmallGICPPCLOdometryEstimation>(params); });
 
-}  // namespace small_gicp
+// }  // namespace small_gicp
 
 #endif
